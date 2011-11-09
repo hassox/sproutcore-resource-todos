@@ -14,9 +14,15 @@ Todos.todosController = SC.ResourceCollection.create({
 
   createTodo: function(title) {
     var todo = Todos.Todo.create({ title: title || '', isDone: false });
-    todo.save().done(function() {
+    todo.save().done(function(data) {
+      todo.set('id', data.id);
       Todos.todosController.pushObject(todo);
     })
+  },
+
+  updateTodo: function(todo){
+    if (!todo && todo.save) return;
+    todo.save();
   },
 
   clearCompletedTodos: function() {
@@ -33,8 +39,10 @@ Todos.todosController = SC.ResourceCollection.create({
 
   allAreDone: function(key, value) {
     if (value !== undefined) {
+      this.forEach(function(item){
+        if (item.get('isDone') != value) item.set('isDone', value).save();
+      })
       this.setEach('isDone', value);
-
       return value;
     } else {
       return !!this.get('length') && this.everyProperty('isDone', true);
@@ -49,6 +57,14 @@ Todos.StatsView = SC.View.extend({
     var remaining = this.get('remaining');
     return remaining + (remaining === 1 ? " item" : " items");
   }.property('remaining')
+});
+
+Todos.TodosView = SC.CollectionView.extend({
+  itemViewClass: SC.Checkbox.extend({
+    change: function(){
+      Todos.todosController.updateTodo(this.get('content'));
+    }
+  })
 });
 
 Todos.CreateTodoView = SC.TextField.extend({
