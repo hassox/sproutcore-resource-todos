@@ -42,7 +42,6 @@ Todos.todosController = SC.ResourceCollection.create({
       this.forEach(function(item){
         if (item.get('isDone') != value) item.set('isDone', value).save();
       })
-      this.setEach('isDone', value);
       return value;
     } else {
       return !!this.get('length') && this.everyProperty('isDone', true);
